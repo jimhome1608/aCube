@@ -13,10 +13,14 @@ public class LedCubeTicTacToe extends LedCube {
     public Point3D winStart;
     public Point3D winEnd;
     public boolean needDefensiveMove = false;
+    public boolean foundNextMove = false;
+    public boolean canWin = false;
     public boolean PlayerWon = false;
     public boolean MachineWon = false;
     public Point3D winStartMachine;
     public Point3D winEndMachine;
+
+    int BestLineSoFar = 0;
 
     public boolean GameOver() {
         if (PlayerWon)
@@ -295,6 +299,9 @@ public class LedCubeTicTacToe extends LedCube {
             int countHowManySetInLine = 0;
             Led led;
             boolean _result = false;
+            BestLineSoFar = 0;
+            foundNextMove = false;
+            canWin = false;
             //check all X  lines
             for (z=0;z< 4;z++) {
                 for (y = 0; y < 4; y++) {
@@ -458,6 +465,7 @@ public class LedCubeTicTacToe extends LedCube {
 
         public int checkMachineWinInLine(Point3D p1, Point3D p2) {
             int countHowManySetInLine = 0;
+            int countHowManUserSetInLine = 0;
             //Log.v("outStream" + Integer.toString(i), Character.toString((char) (Integer.parseInt(Byte.toString(income.getBytes()[i])))));
             ArrayList<Led>  leds = new ArrayList<Led>();
             Led led;
@@ -466,6 +474,8 @@ public class LedCubeTicTacToe extends LedCube {
             leds.add(led);
             if (led.turnedOnByMacine)
                 countHowManySetInLine++;
+            if (led.turnedOnByUser)
+                countHowManUserSetInLine++;
             if (p.x < p2.x) p.x++;
             if (p.x > p2.x) p.x--;
             if (p.y < p2.y) p.y++;
@@ -476,6 +486,8 @@ public class LedCubeTicTacToe extends LedCube {
             leds.add(led);
             if (led.turnedOnByMacine)
                 countHowManySetInLine++;
+            if (led.turnedOnByUser)
+                countHowManUserSetInLine++;
             if (p.x < p2.x) p.x++;
             if (p.x > p2.x) p.x--;
             if (p.y < p2.y) p.y++;
@@ -486,6 +498,8 @@ public class LedCubeTicTacToe extends LedCube {
             leds.add(led);
             if (led.turnedOnByMacine)
                 countHowManySetInLine++;
+            if (led.turnedOnByUser)
+                countHowManUserSetInLine++;
             if (p.x < p2.x) p.x++;
             if (p.x > p2.x) p.x--;
             if (p.y < p2.y) p.y++;
@@ -496,6 +510,23 @@ public class LedCubeTicTacToe extends LedCube {
             leds.add(led);
             if (led.turnedOnByMacine)
                 countHowManySetInLine++;
+            if (led.turnedOnByUser)
+                countHowManUserSetInLine++;
+            if (countHowManUserSetInLine == 0) {
+                if (countHowManySetInLine > BestLineSoFar) {
+                    BestLineSoFar = countHowManySetInLine;
+                    for (int i=0;i<4;i++) {
+                        led = (Led) leds.get(i);
+                        if (led.turnedOnByMacine || led.turnedOnByUser)
+                            continue;
+                        nextMachineMove.set(led.x, led.y, led.z);
+                        foundNextMove = true;
+                        if (countHowManySetInLine == 3)
+                            canWin = true;
+                    }
+                }
+            }
+
             return  countHowManySetInLine;
         }
 

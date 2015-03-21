@@ -310,7 +310,16 @@ public  class aCubeActivity extends Activity implements View.OnClickListener, Se
                     ledCube.BlueToothWrite();
                     break;
                 }
+                ledCube.checkForMachineWin();
+                if (ledCube.canWin) {
+                    tvLeft.setText("canWin");
+                    ledCube.setTurnedOnByMachine();
+                    ledCube.BlueToothWrite();
+                    ledCube.checkForMachineWin();
+                }
+                ledCube.checkForWin();
                 if (ledCube.needDefensiveMove) {
+                    tvLeft.setText("DefensiveMov");
                     //tvLeft.setText("nextDefensiveMove x:" + String.format("%d", ledCube.nextMachineMove.x) +
                     //        "  y:" + String.format("%d", ledCube.nextMachineMove.y) +
                     //        " z:" + String.format("%d", ledCube.nextMachineMove.z));
@@ -318,11 +327,18 @@ public  class aCubeActivity extends Activity implements View.OnClickListener, Se
                     ledCube.BlueToothWrite();
                 }
                 else {
-                    tvLeft.setText("random move");
-                    if (ledCube.findRandomMachineMove()) {
-                        tvLeft.setText("random move OK");
+                    ledCube.checkForMachineWin();
+                    if (ledCube.foundNextMove) {
+                        tvLeft.setText("foundNextMove");
                         ledCube.setTurnedOnByMachine();
                         ledCube.BlueToothWrite();
+                    }
+                    else {
+                        if (ledCube.findRandomMachineMove()) {
+                            tvLeft.setText("random move OK");
+                            ledCube.setTurnedOnByMachine();
+                            ledCube.BlueToothWrite();
+                        }
                     }
                 }
                 MachineWins = ledCube.checkForMachineWin();
