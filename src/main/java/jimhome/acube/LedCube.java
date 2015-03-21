@@ -1,13 +1,16 @@
 package jimhome.acube;
 
+import android.graphics.Color;
 import android.os.SystemClock;
 
 import java.util.ArrayList;
 import java.util.Random;
 
 public class LedCube {
-
+    public String homeColor = "yellow";
+    public String onColor = "blue";
     public Point3D home3D;
+    public Point3D AnotherSpot;
     public ArrayList<Led> ledList = new ArrayList<Led>();
     public String direction = "xup";
     public boolean busy = false;
@@ -36,6 +39,7 @@ public class LedCube {
                 for (int z=0; z<4; z++) {
                     led = getLed(rn.nextInt(4),rn.nextInt(4),rn.nextInt(4));
                     led.randomColor();
+                    led.turnedOnByUser = false;
                     BlueToothWrite();
                    // SystemClock.sleep(10);
                 }
@@ -44,142 +48,11 @@ public class LedCube {
         busy = false;
     }
 
-    public void WalkThisWay() {
-        int _delay = 0;
-        boolean hitX = false;
-        boolean hitY = false;
-        boolean hitZ = false;
-        while ( hitZ == false) {
-            hitX = false;
-            while (hitX == false) {
-                hitX = Xplus();
-                BlueToothWrite();
-                SystemClock.sleep(_delay);
-            }
-            hitY = false;
-            while (hitY == false) {
-                hitY = Yplus();
-                BlueToothWrite();
-                SystemClock.sleep(_delay);
-            }
-            hitX = false;
-            while (hitX == false) {
-                hitX = Xminus();
-                BlueToothWrite();
-                SystemClock.sleep(_delay);
-            }
-            hitY = false;
-            while (hitY == false) {
-                hitY = Yminus();
-                BlueToothWrite();
-                SystemClock.sleep(_delay);
-            }
-            hitZ = Zplus();
-            BlueToothWrite();
-            SystemClock.sleep(_delay);
-        }
-        hitX = false;
-        while (hitX == false) {
-            hitX = Xplus();
-            BlueToothWrite();
-            SystemClock.sleep(_delay);
-        }
-        hitY = false;
-        while (hitY == false) {
-            hitY = Yplus();
-            BlueToothWrite();
-            SystemClock.sleep(_delay);
-        }
-        hitX = false;
-        while (hitX == false) {
-            hitX = Xminus();
-            BlueToothWrite();
-            SystemClock.sleep(_delay);
-        }
-        hitY = false;
-        while (hitY == false) {
-            hitY = Yminus();
-            BlueToothWrite();
-            SystemClock.sleep(_delay);
-        }
-    }
 
-    public void WalkThisWayBasic() {
-        busy = true;
-        int x = 0;
-        int y = 0;
-        int z = 0;
-        Led led;
-        Led prevLed = null;
-        int _delay = 0;
-
-        MoveTo(0,0,0);
-        for (z=0;z<=3;z++) {
-            for (x = 0; x <= 3; x++) {
-                Xplus();
-                BlueToothWrite();
-                SystemClock.sleep(_delay);
-            }
-            for (y = 1; y <= 3; y++) {
-                Yplus();
-                BlueToothWrite();
-                SystemClock.sleep(_delay);
-            }
-            for (x = 2; x >= 0; x--) {
-                Xminus();
-                BlueToothWrite();
-                SystemClock.sleep(_delay);
-            }
-            for (y = 2; y >= 0; y--) {
-                Yminus();
-                BlueToothWrite();
-                SystemClock.sleep(_delay);
-            }
-            Zplus();
-            BlueToothWrite();
-            SystemClock.sleep(_delay);
-        }
-        busy = false;
-    }
-
-
-    public void Step() {
-        int _delay = 200;
-        if (direction == "zup" ) {
-            Zplus();
-            direction = "xup";
-            return;
-        }
-        if (direction == "xup" ) {
-            if (Xplus()==true)
-                direction = "yup";
-            return;
-        }
-        if (direction == "yup" ) {
-            if (Yplus()==true)
-                direction = "xdown";
-            return;
-        }
-        if (direction == "xdown" ) {
-            if (Xminus()==true)
-                direction = "ydown";
-            return;
-        }
-        if (direction == "ydown" ) {
-            if (Yminus()==true)
-                direction = "zup";
-            return;
-        }
-        if (direction != "stop" ) {
-            BlueToothWrite();
-            SystemClock.sleep(_delay);
-        }
-        if (home3D.x ==0 && home3D.y == 0 && home3D.z == 3)
-            direction = "stop";
-    }
 
     public LedCube() {
         home3D = new Point3D(0, 0, 0);
+        AnotherSpot = new Point3D(0, 0, 0);
         for (int x = 0; x < 4; x++) {
             for (int y = 0; y < 4; y++) {
                 for (int z = 0; z < 4; z++) {
@@ -220,6 +93,13 @@ public class LedCube {
         return result;
     }
 
+    public void setTurnedOnByUser() {
+        Led led;
+        led = getLed(home3D.x,home3D.y, home3D.z);
+        led.turnOn(onColor);
+        led.turnedOnByUser = true;
+    }
+
 
     public void MoveTo (int x, int y, int z) {
         home3D.x = x;
@@ -233,7 +113,7 @@ public class LedCube {
         for (int x = 0; x < 4; x++) {
             for (int y=0; y<4; y++) {
                 led = getLed(x,y, home3D.z);
-                led.turnOn();
+                led.turnOn(homeColor);
             }
         }
         return 0;
@@ -245,7 +125,7 @@ public class LedCube {
         for (int z = 0; z < 4; z++) {
             for (int y=0; y<4; y++) {
                 led = getLed(home3D.x,y, z);
-                led.turnOn();
+                led.turnOn(homeColor);
             }
         }
         return 0;
@@ -257,7 +137,7 @@ public class LedCube {
         for (int x = 0; x < 4; x++) {
             for (int z=0; z<4; z++) {
                 led = getLed(x,home3D.y, z);
-                led.turnOn();
+                led.turnOn(homeColor);
             }
         }
         return 0;
@@ -269,6 +149,7 @@ public class LedCube {
             led = (Led) ledList.get(i);
             if (led.hasColor()) {
                 led.changed = true;
+                led.turnedOnByUser = false;
                 led.b = 0;
                 led.g = 0;
                 led.r = 0;
@@ -278,28 +159,26 @@ public class LedCube {
         return 0;
     }
 
-    public int AllOn() {
+    public int AllOn(String colorString) {
         Led led;
+        int color = Color.parseColor(colorString);
         for (int i = 0; i < 64; i++) {
             led = (Led) ledList.get(i);
-            if (led.hasColor() == false) {
-                led.changed = true;
-                led.b = 255;
-                led.g = 0;
-                led.r = 0;
-            };
+            led.b = Color.blue(color);
+            led.g = Color.green(color);
+            led.r = Color.red(color);
         }
         //MoveTo(0,0,0);
         return 0;
     }
 
     public void LineTo(Point3D p) {
-        DrawLine(home3D, p);
+        DrawLine(home3D, p,homeColor);
         MoveTo(p.x,p.y,p.z);
     }
 
     public void LineTo(int x, int y, int z) {
-        DrawLine(home3D, new Point3D(x,y,z));
+        DrawLine(home3D, new Point3D(x,y,z),homeColor);
         MoveTo(x, y, z);
     }
 
@@ -311,7 +190,7 @@ public class LedCube {
         if (home3D.x > 3)
             home3D.x = 3;
         led = getLed(home3D.x,home3D.y,home3D.z);
-        led.turnOn();
+        led.turnOn(homeColor);
         return (home3D.x == 3);
 
     }
@@ -324,7 +203,7 @@ public class LedCube {
         if (home3D.x < 0)
             home3D.x = 0;
         led = getLed(home3D.x,home3D.y,home3D.z);
-        led.turnOn();
+        led.turnOn(homeColor);
         return (home3D.x == 0);
     }
 
@@ -336,7 +215,7 @@ public class LedCube {
         if (home3D.z > 3)
             home3D.z = 3;
         led = getLed(home3D.x,home3D.y,home3D.z);
-        led.turnOn();
+        led.turnOn(homeColor);
         return (home3D.z == 3);
     }
 
@@ -348,7 +227,7 @@ public class LedCube {
         if (home3D.z < 0)
             home3D.z = 0;
         led = getLed(home3D.x,home3D.y,home3D.z);
-        led.turnOn();
+        led.turnOn(homeColor);
         return (home3D.z == 0);
     }
 
@@ -360,7 +239,7 @@ public class LedCube {
         if (home3D.y > 3)
             home3D.y = 3;
         led = getLed(home3D.x,home3D.y,home3D.z);
-        led.turnOn();
+        led.turnOn(homeColor);
         return (home3D.y == 3);
     }
 
@@ -372,15 +251,16 @@ public class LedCube {
         if (home3D.y < 0)
             home3D.y = 0;
         led = getLed(home3D.x,home3D.y,home3D.z);
-        led.turnOn();
+        led.turnOn(homeColor);
         return (home3D.y == 0);
     }
 
-    public  int DrawLine(Point3D p1, Point3D p2 ) {
+    public  int DrawLine(Point3D p1, Point3D p2, String colorString ) {
+        int color = Color.parseColor(colorString);
         Led led;
         Point3D p = new Point3D(p1.x,p1.y,p1.z);
         led = getLed(p.x,p.y,p.z);
-        led.b = 255;
+        led.setColor(color);
         led.changed = true;
         if (p.x < p2.x) p.x++;
         if (p.x > p2.x) p.x--;
@@ -389,7 +269,7 @@ public class LedCube {
         if (p.z < p2.z) p.z++;
         if (p.z > p2.z) p.z--;
         led = getLed(p.x,p.y,p.z);
-        led.b = 255;
+        led.setColor(color);
         led.changed = true;
         if (p.x < p2.x) p.x++;
         if (p.x > p2.x) p.x--;
@@ -398,7 +278,7 @@ public class LedCube {
         if (p.z < p2.z) p.z++;
         if (p.z > p2.z) p.z--;
         led = getLed(p.x,p.y,p.z);
-        led.b = 255;
+        led.setColor(color);
         led.changed = true;
         if (p.x < p2.x) p.x++;
         if (p.x > p2.x) p.x--;
@@ -407,7 +287,7 @@ public class LedCube {
         if (p.z < p2.z) p.z++;
         if (p.z > p2.z) p.z--;
         led = getLed(p.x,p.y,p.z);
-        led.b = 255;
+        led.setColor(color);
         led.changed = true;
         return 1;
     }
@@ -452,6 +332,13 @@ public class LedCube {
         public int g = 0;
         public int b = 0;
         public boolean changed = false;
+        public boolean turnedOnByUser = false;
+
+        public void setColor(int color ) {
+            r = Color.red(color);
+            g = Color.green(color);
+            b = Color.blue(color);
+        }
 
         public Led(int _x, int _y, int _z, int _r, int _g, int _b){
             x = _x;
@@ -465,6 +352,7 @@ public class LedCube {
         public boolean hasColor()
         {
            boolean _result = false;
+
            if (r != 0) _result = true;
            if (g != 0) _result = true;
            if (b != 0) _result = true;
@@ -484,12 +372,14 @@ public class LedCube {
             if (hasColor())
                 turnOff();
             else
-                turnOn();
+                turnOn(homeColor);
             changed = true;
         }
 
 
         public void turnOff() {
+            if (turnedOnByUser)
+                return;
             if (hasColor()) {
                 changed = true;
                 r = 0;
@@ -498,13 +388,22 @@ public class LedCube {
             }
         }
 
-        public void turnOn() {
-            if (! hasColor()) {
+        public void turnOn(String colorString) {
+            if (turnedOnByUser)
+                 return;
+            int color = Color.parseColor(colorString);
+            if (r != Color.red(color)) {
                 changed = true;
-                r = 0;
-                g = 0;
-                b = 255;
-            }
+                r = Color.red(color);
+            };
+            if (g != Color.green(color)) {
+                changed = true;
+                g = Color.green(color);
+            };
+            if (b != Color.blue(color)) {
+                changed = true;
+                b = Color.blue(color);
+            };
         }
 
         public String asCommand() {

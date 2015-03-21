@@ -92,7 +92,7 @@ public  class aCubeActivity extends Activity implements View.OnClickListener, Se
                 last_z = z;
             }
         }
-        tvLeft.setText("x:"+ String.format("%.1f", Gx) +"  y:"+ String.format("%.1f", Gy) + " z:"+ String.format("%.1f", Gz));
+       // tvLeft.setText("x:"+ String.format("%.1f", Gx) +"  y:"+ String.format("%.1f", Gy) + " z:"+ String.format("%.1f", Gz));
     }
 
     protected void onResume(){
@@ -109,7 +109,7 @@ public  class aCubeActivity extends Activity implements View.OnClickListener, Se
 		super.onBackPressed();
 	}
 
-    LedCube ledCube = new LedCube();
+    LedCubeTicTacToe ledCube = new LedCubeTicTacToe();
 
     static int upLeft = 0;
 
@@ -123,6 +123,7 @@ public  class aCubeActivity extends Activity implements View.OnClickListener, Se
     Button btnXminus;
     Button btnZplus;
     Button btnZminus;
+    Button btnSetBlue;
 
     TextView tvLeft;
 
@@ -212,6 +213,8 @@ public  class aCubeActivity extends Activity implements View.OnClickListener, Se
         btnZplus.setOnClickListener(this);
         btnZminus = (Button)findViewById(R.id.btnZminus);
         btnZminus.setOnClickListener(this);
+        btnSetBlue  = (Button)findViewById(R.id.btnSetBlue);
+        btnSetBlue.setOnClickListener(this);
 
         tvLeft = (TextView)findViewById(R.id.tvLeft);
 		//init toggleButton
@@ -236,9 +239,13 @@ public  class aCubeActivity extends Activity implements View.OnClickListener, Se
                 break;
             case R.id.btnCLEAR:
                 ledCube.AllOff();
+                ledCube.PlayerWon = false;
                 ledCube.BlueToothWrite();
                 ledCube.MoveTo(0,0,0);
                 ledCube.BlueToothWrite();
+                //ledCube.AnotherSpot.set(3,3,3);
+                //ledCube.DrawLine(ledCube.home3D,ledCube.AnotherSpot,"blue");
+                //ledCube.BlueToothWrite();
                 //ledCube.WalkThisWayBasic();
                 //ledCube.direction = "xup";
                 //while (ledCube.direction != "stop")
@@ -246,28 +253,55 @@ public  class aCubeActivity extends Activity implements View.OnClickListener, Se
                 //ledCube.WalkThisWay();
                 break;
             case R.id.btnYplus:
+                if (ledCube.PlayerWon)
+                    break;
                 ledCube.Yplus();
                 ledCube.BlueToothWrite();
                 break;
             case R.id.btnYminus:
+                if (ledCube.PlayerWon)
+                    break;
                 ledCube.Yminus();
                 ledCube.BlueToothWrite();
                 break;
             case R.id.btnXplus:
+                if (ledCube.PlayerWon)
+                    break;
                 ledCube.Xplus();
                 ledCube.BlueToothWrite();
                 break;
             case R.id.btnXminus:
+                if (ledCube.PlayerWon)
+                    break;
                 ledCube.Xminus();
                 ledCube.BlueToothWrite();
                 break;
             case R.id.btnZplus:
+                if (ledCube.PlayerWon)
+                    break;
                 ledCube.Zplus();
                 ledCube.BlueToothWrite();
                 break;
             case R.id.btnZminus:
+                if (ledCube.PlayerWon)
+                    break;
                 ledCube.Zminus();
                 ledCube.BlueToothWrite();
+                break;
+            case R.id.btnSetBlue:
+                if (ledCube.PlayerWon)
+                    break;
+                ledCube.setTurnedOnByUser();
+                ledCube.BlueToothWrite();
+                if (ledCube.checkForWin()) {
+                    //ledCube.AllOn("purple");
+                    tvLeft.setText("x:"+ String.format("%d", ledCube.winStart.x) +
+                                   "  y:"+String.format("%d", ledCube.winStart.y) +
+                                   " z:"+String.format("%d",  ledCube.winStart.z));
+                    ledCube.AllOff();
+                    ledCube.showWiningLine();
+                    ledCube.BlueToothWrite();
+                }
                 break;
         }
 
