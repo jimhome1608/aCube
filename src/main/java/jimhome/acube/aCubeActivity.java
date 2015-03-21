@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.*;
@@ -224,6 +225,8 @@ public  class aCubeActivity extends Activity implements View.OnClickListener, Se
 	@Override
 	public void onClick(View v) {
         // TODO Auto-generated method stub
+        boolean PlayerWins = false;
+        boolean MachineWins = false;
         switch (v.getId()) {
             case R.id.bConnect:
                 if (aBluetooth.connectedThread != null) {
@@ -240,6 +243,7 @@ public  class aCubeActivity extends Activity implements View.OnClickListener, Se
             case R.id.btnCLEAR:
                 ledCube.AllOff();
                 ledCube.PlayerWon = false;
+                ledCube.MachineWon = false;
                 ledCube.BlueToothWrite();
                 ledCube.MoveTo(0,0,0);
                 ledCube.BlueToothWrite();
@@ -253,54 +257,81 @@ public  class aCubeActivity extends Activity implements View.OnClickListener, Se
                 //ledCube.WalkThisWay();
                 break;
             case R.id.btnYplus:
-                if (ledCube.PlayerWon)
+                if (ledCube.GameOver())
                     break;
                 ledCube.Yplus();
                 ledCube.BlueToothWrite();
                 break;
             case R.id.btnYminus:
-                if (ledCube.PlayerWon)
+                if (ledCube.GameOver())
                     break;
                 ledCube.Yminus();
                 ledCube.BlueToothWrite();
                 break;
             case R.id.btnXplus:
-                if (ledCube.PlayerWon)
+                if (ledCube.GameOver())
                     break;
                 ledCube.Xplus();
                 ledCube.BlueToothWrite();
                 break;
             case R.id.btnXminus:
-                if (ledCube.PlayerWon)
+                if (ledCube.GameOver())
                     break;
                 ledCube.Xminus();
                 ledCube.BlueToothWrite();
                 break;
             case R.id.btnZplus:
-                if (ledCube.PlayerWon)
+                if (ledCube.GameOver())
                     break;
                 ledCube.Zplus();
                 ledCube.BlueToothWrite();
                 break;
             case R.id.btnZminus:
-                if (ledCube.PlayerWon)
+                if (ledCube.GameOver())
                     break;
                 ledCube.Zminus();
                 ledCube.BlueToothWrite();
                 break;
             case R.id.btnSetBlue:
-                if (ledCube.PlayerWon)
+                tvLeft.setText("");
+                if (ledCube.GameOver())
                     break;
-                ledCube.setTurnedOnByUser();
+                if (! ledCube.setTurnedOnByUser())
+                    break;
                 ledCube.BlueToothWrite();
-                if (ledCube.checkForWin()) {
+                PlayerWins = ledCube.checkForWin();
+                if (PlayerWins) {
                     //ledCube.AllOn("purple");
-                    tvLeft.setText("x:"+ String.format("%d", ledCube.winStart.x) +
-                                   "  y:"+String.format("%d", ledCube.winStart.y) +
-                                   " z:"+String.format("%d",  ledCube.winStart.z));
+                    //tvLeft.setText("x:"+ String.format("%d", ledCube.winStart.x) +
+                    //               "  y:"+String.format("%d", ledCube.winStart.y) +
+                    //               " z:"+String.format("%d",  ledCube.winStart.z));
                     ledCube.AllOff();
                     ledCube.showWiningLine();
                     ledCube.BlueToothWrite();
+                    break;
+                }
+                if (ledCube.needDefensiveMove) {
+                    //tvLeft.setText("nextDefensiveMove x:" + String.format("%d", ledCube.nextMachineMove.x) +
+                    //        "  y:" + String.format("%d", ledCube.nextMachineMove.y) +
+                    //        " z:" + String.format("%d", ledCube.nextMachineMove.z));
+                    ledCube.setTurnedOnByMachine();
+                    ledCube.BlueToothWrite();
+                }
+                else {
+                    tvLeft.setText("random move");
+                    if (ledCube.findRandomMachineMove()) {
+                        tvLeft.setText("random move OK");
+                        ledCube.setTurnedOnByMachine();
+                        ledCube.BlueToothWrite();
+                    }
+                }
+                MachineWins = ledCube.checkForMachineWin();
+                if (MachineWins) {
+                    tvLeft.setText("MachineWins");
+                    ledCube.AllOff();
+                    ledCube.showMachineWiningLine();
+                    ledCube.BlueToothWrite();
+                    break;
                 }
                 break;
         }

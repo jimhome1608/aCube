@@ -9,7 +9,9 @@ import java.util.Random;
 public class LedCube {
     public String homeColor = "yellow";
     public String onColor = "blue";
+    public String machineColor = "red";
     public Point3D home3D;
+    public Point3D nextMachineMove;
     public Point3D AnotherSpot;
     public ArrayList<Led> ledList = new ArrayList<Led>();
     public String direction = "xup";
@@ -52,6 +54,7 @@ public class LedCube {
 
     public LedCube() {
         home3D = new Point3D(0, 0, 0);
+        nextMachineMove = new Point3D(0, 0, 0);
         AnotherSpot = new Point3D(0, 0, 0);
         for (int x = 0; x < 4; x++) {
             for (int y = 0; y < 4; y++) {
@@ -93,19 +96,34 @@ public class LedCube {
         return result;
     }
 
-    public void setTurnedOnByUser() {
+    public boolean setTurnedOnByUser() {
         Led led;
         led = getLed(home3D.x,home3D.y, home3D.z);
+        if (led.turnedOnByMacine)
+            return false;
+       if (led.turnedOnByUser)
+           return false;
         led.turnOn(onColor);
         led.turnedOnByUser = true;
+        return true;
     }
 
+    public void setTurnedOnByMachine() {
+        Led led;
+        led = getLed(nextMachineMove.x,nextMachineMove.y, nextMachineMove.z);
+        if (led.turnedOnByUser)
+            return;
+        led.turnOn(machineColor);
+        led.turnedOnByMacine = true;
+    }
 
     public void MoveTo (int x, int y, int z) {
         home3D.x = x;
         home3D.y = y;
         home3D.z = z;
     }
+
+
 
     public int LevelZ(int _z) {
         AllOff();
@@ -147,13 +165,14 @@ public class LedCube {
         Led led;
         for (int i = 0; i < 64; i++) {
             led = (Led) ledList.get(i);
+            led.turnedOnByUser = false;
+            led.turnedOnByMacine = false;
             if (led.hasColor()) {
                 led.changed = true;
-                led.turnedOnByUser = false;
                 led.b = 0;
                 led.g = 0;
                 led.r = 0;
-            };
+            }
         }
         //MoveTo(0,0,0);
         return 0;
@@ -333,6 +352,7 @@ public class LedCube {
         public int b = 0;
         public boolean changed = false;
         public boolean turnedOnByUser = false;
+        public boolean turnedOnByMacine = false;
 
         public void setColor(int color ) {
             r = Color.red(color);
@@ -380,6 +400,8 @@ public class LedCube {
         public void turnOff() {
             if (turnedOnByUser)
                 return;
+            if (turnedOnByMacine)
+                return;
             if (hasColor()) {
                 changed = true;
                 r = 0;
@@ -391,6 +413,8 @@ public class LedCube {
         public void turnOn(String colorString) {
             if (turnedOnByUser)
                  return;
+            if (turnedOnByMacine)
+                return;
             int color = Color.parseColor(colorString);
             if (r != Color.red(color)) {
                 changed = true;

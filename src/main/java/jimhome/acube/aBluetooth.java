@@ -273,7 +273,7 @@ public class aBluetooth extends Activity implements OnItemClickListener{
 			try {
 				mmOutStream.write(income.getBytes());
 				for(int i=0;i<income.getBytes().length;i++)
-				Log.v("outStream"+Integer.toString(i),Character.toString((char)(Integer.parseInt(Byte.toString(income.getBytes()[i])))));
+				//Log.v("outStream"+Integer.toString(i),Character.toString((char)(Integer.parseInt(Byte.toString(income.getBytes()[i])))));
 				try {
 					Thread.sleep(20);
 				} catch (InterruptedException e) {
