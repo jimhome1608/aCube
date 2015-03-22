@@ -10,14 +10,18 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.*;
+import android.media.ToneGenerator;
+
 
 public  class aCubeActivity extends Activity implements View.OnClickListener, SensorEventListener{
 
@@ -31,6 +35,9 @@ public  class aCubeActivity extends Activity implements View.OnClickListener, Se
     float last_x = 0;
     float last_y = 0;
     float last_z = 0;
+
+    ToneGenerator toneG = new ToneGenerator(AudioManager.STREAM_SYSTEM,100);
+
 
     @Override
     public final void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -58,7 +65,7 @@ public  class aCubeActivity extends Activity implements View.OnClickListener, Se
         boolean overMark = false;
         long curTime = System.currentTimeMillis();
         // only allow one update every 100ms.
-        if (toggleButtonShake.isChecked() == true) {
+        if (cbxShake.isChecked() == true) {
             if ((curTime - lastUpdate) > 100) {
                 long diffTime = (curTime - lastUpdate);
                 lastUpdate = curTime;
@@ -72,21 +79,6 @@ public  class aCubeActivity extends Activity implements View.OnClickListener, Se
                         ledCube.RandomLedsRandomColors();
                         lastShake = curTime;
                     }
-                } else {
-                    if (z < 0) {
-                        ledCube.AllOff();
-                        ledCube.LevelZ(3);
-                        ledCube.BlueToothWrite();
-                    } else {
-                        if (ledCube.busy != true) {
-                            ledCube.AllOff();
-                            ledCube.BlueToothWrite();
-                        }
-                    }
-                    /*if (curTime - lastShake > 500){
-                        ledCube.AllOff();
-                        ledCube.BlueToothWrite();
-                    }*/
                 }
                 last_x = x;
                 last_y = y;
@@ -118,18 +110,19 @@ public  class aCubeActivity extends Activity implements View.OnClickListener, Se
 
 
 	Button btnCLEAR;
-    Button btnYplus;
-    Button btnYminus;
-    Button btnXplus;
-    Button btnXminus;
-    Button btnZplus;
-    Button btnZminus;
+    ImageButton btnYplus;
+    ImageButton btnYminus;
+    ImageButton btnXplus;
+    ImageButton btnXminus;
+    ImageButton btnZplus;
+    ImageButton btnZminus;
     Button btnSetBlue;
 
     TextView tvLeft;
 
 	Button bConnect, bDisconnect;
-    ToggleButton toggleButtonShake;
+    CheckBox cbxShake;
+    CheckBox cbxSound;
 
 	Handler mHandler = new Handler(){
 		@Override
@@ -177,7 +170,7 @@ public  class aCubeActivity extends Activity implements View.OnClickListener, Se
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		//requestWindowFeature(Window.FEATURE_NO_TITLE);//Hide title
+		requestWindowFeature(Window.FEATURE_NO_TITLE);//Hide title
 		this.getWindow().setFlags(WindowManager.LayoutParams.
 				FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);//Hide Status bar
 		setContentView(R.layout.activity_acube);
@@ -195,24 +188,26 @@ public  class aCubeActivity extends Activity implements View.OnClickListener, Se
 	}
 
 	void InitControls(){
-        toggleButtonShake = (ToggleButton)findViewById(R.id.toggleButtonShake);
-        toggleButtonShake.setOnClickListener(this);
+        cbxShake = (CheckBox)findViewById(R.id.cbxShake);
+        cbxShake.setOnClickListener(this);
+        cbxSound = (CheckBox)findViewById(R.id.cbxSound);
+        cbxSound.setOnClickListener(this);
 		bConnect = (Button)findViewById(R.id.bConnect);
 		bConnect.setOnClickListener(this);
         btnCLEAR = (Button)findViewById(R.id.btnCLEAR);
         btnCLEAR.setOnClickListener(this);
-        btnYplus = (Button)findViewById(R.id.btnYplus);
+        btnYplus = (ImageButton)findViewById(R.id.btnYplus); //
         btnYplus.setOnClickListener(this);
-        btnYminus = (Button)findViewById(R.id.btnYminus);
+        btnYminus = (ImageButton)findViewById(R.id.btnYminus);//
         btnYminus.setOnClickListener(this);
-        btnXplus = (Button)findViewById(R.id.btnXplus);
+        btnXplus = (ImageButton)findViewById(R.id.btnXplus);
         btnXplus.setOnClickListener(this);
-        btnXminus = (Button)findViewById(R.id.btnXminus);
+        btnXminus = (ImageButton)findViewById(R.id.btnXminus);
         btnXminus.setOnClickListener(this);
 
-        btnZplus = (Button)findViewById(R.id.btnZplus);
+        btnZplus = (ImageButton)findViewById(R.id.btnZplus); //btnZplus
         btnZplus.setOnClickListener(this);
-        btnZminus = (Button)findViewById(R.id.btnZminus);
+        btnZminus = (ImageButton)findViewById(R.id.btnZminus);//btnZminus
         btnZminus.setOnClickListener(this);
         btnSetBlue  = (Button)findViewById(R.id.btnSetBlue);
         btnSetBlue.setOnClickListener(this);
@@ -221,6 +216,11 @@ public  class aCubeActivity extends Activity implements View.OnClickListener, Se
 		//init toggleButton
 	}
 
+    public void PlaySound() {
+        if (!cbxSound.isChecked())
+             return;
+        toneG.startTone(ToneGenerator.TONE_SUP_BUSY, 200);
+    }
 
 	@Override
 	public void onClick(View v) {
@@ -259,37 +259,43 @@ public  class aCubeActivity extends Activity implements View.OnClickListener, Se
             case R.id.btnYplus:
                 if (ledCube.GameOver())
                     break;
-                ledCube.Yplus();
+                ledCube.Zplus();
+                PlaySound();
                 ledCube.BlueToothWrite();
                 break;
             case R.id.btnYminus:
                 if (ledCube.GameOver())
                     break;
-                ledCube.Yminus();
+                ledCube.Zminus();
+                PlaySound();
                 ledCube.BlueToothWrite();
                 break;
             case R.id.btnXplus:
                 if (ledCube.GameOver())
                     break;
                 ledCube.Xplus();
+                PlaySound();
                 ledCube.BlueToothWrite();
                 break;
             case R.id.btnXminus:
                 if (ledCube.GameOver())
                     break;
                 ledCube.Xminus();
+                PlaySound();
                 ledCube.BlueToothWrite();
                 break;
             case R.id.btnZplus:
                 if (ledCube.GameOver())
                     break;
-                ledCube.Zplus();
+                ledCube.Yplus();
+                PlaySound();
                 ledCube.BlueToothWrite();
                 break;
             case R.id.btnZminus:
                 if (ledCube.GameOver())
                     break;
-                ledCube.Zminus();
+                ledCube.Yminus();
+                PlaySound();
                 ledCube.BlueToothWrite();
                 break;
             case R.id.btnSetBlue:
@@ -308,6 +314,7 @@ public  class aCubeActivity extends Activity implements View.OnClickListener, Se
                     ledCube.AllOff();
                     ledCube.showWiningLine();
                     ledCube.BlueToothWrite();
+                    toneG.startTone(ToneGenerator.TONE_CDMA_ANSWER, 2000);
                     break;
                 }
                 ledCube.checkForMachineWin();
@@ -347,6 +354,7 @@ public  class aCubeActivity extends Activity implements View.OnClickListener, Se
                     ledCube.AllOff();
                     ledCube.showMachineWiningLine();
                     ledCube.BlueToothWrite();
+                    toneG.startTone(ToneGenerator.TONE_SUP_ERROR, 2000);
                     break;
                 }
                 break;
